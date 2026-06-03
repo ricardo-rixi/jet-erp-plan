@@ -8,6 +8,20 @@
   :root { --bg:#0f1117; --card:#1a1d27; --border:#2a2d3a; --accent:#00c6ff; --accent2:#7b2fff; --green:#00e676; --warn:#ffab00; --text:#e0e0e0; --muted:#8890a4; }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; line-height:1.6; }
+
+  /* LOGIN OVERLAY */
+  .login-overlay { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; }
+  .login-overlay.hidden { display:none; }
+  .login-box { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:40px 32px; text-align:center; max-width:360px; width:90%; }
+  .login-box .logo { font-size:2.5em; margin-bottom:8px; }
+  .login-box h2 { font-size:1.4em; color:#fff; margin-bottom:8px; border:none; padding:0; }
+  .login-box p { color:var(--muted); font-size:.9em; margin-bottom:20px; }
+  .login-box input { width:100%; padding:14px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:#fff; font-size:1em; text-align:center; outline:none; transition:border .2s; }
+  .login-box input:focus { border-color:var(--accent); }
+  .login-box button { width:100%; margin-top:12px; padding:14px; border-radius:10px; border:none; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; font-size:1em; font-weight:700; cursor:pointer; transition:opacity .2s; }
+  .login-box button:hover { opacity:.85; }
+  .login-box .error { color:#ff5252; font-size:.85em; margin-top:10px; display:none; }
+
   .hero { background:linear-gradient(135deg,#1a1d27 0%,#2a1050 100%); padding:60px 24px; text-align:center; border-bottom:3px solid var(--accent); }
   .hero h1 { font-size:2.4em; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:12px; }
   .hero p { color:var(--muted); font-size:1.1em; max-width:700px; margin:0 auto; }
@@ -53,11 +67,30 @@
   details { margin:8px 0; }
   details summary { cursor:pointer; color:var(--accent); font-weight:600; padding:8px 12px; background:var(--card); border-radius:6px; border:1px solid var(--border); }
   details .content { padding:16px; background:rgba(0,0,0,0.2); border-radius:0 0 8px 8px; }
-  @media(max-width:768px){ .grid{grid-template-columns:1fr;} .hero h1{font-size:1.6em;} }
+  .logout-btn { position:fixed; top:12px; right:12px; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:8px; padding:6px 14px; color:var(--muted); cursor:pointer; font-size:.8em; z-index:50; }
+  .logout-btn:hover { color:#ff5252; border-color:#ff5252; }
+  @media(max-width:768px){ .grid{grid-template-columns:1fr;} .hero h1{font-size:1.6em;} .arch-flow{flex-direction:column;} .timeline{flex-direction:column;} }
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="logo">🔐</div>
+    <h2>ERP JET Automatización</h2>
+    <p>Plan Maestro de Desarrollo<br>Acceso restringido</p>
+    <input type="password" id="passInput" placeholder="Contraseña" autofocus autocomplete="off">
+    <button onclick="checkPass()">Ingresar</button>
+    <div class="error" id="loginError">Contraseña incorrecta</div>
+  </div>
+</div>
+
+<!-- LOGOUT -->
+<button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Cerrar sesión</button>
+
+<!-- CONTENT -->
+<div id="mainContent">
 <div class="hero">
   <h1>🚀 ERP JET Automatización</h1>
   <p>Plan Maestro de Desarrollo — De Google Sheets a un ERP completo con AppSheet Database + Looker Studio + Portal Web</p>
@@ -70,10 +103,7 @@
 </div>
 
 <div class="container">
-
-<!-- ARQUITECTURA -->
 <h2><span class="icon">🏗️</span> Arquitectura del Sistema</h2>
-
 <div class="arch-flow">
   <div class="layer l1">📱 AppSheet<br><small>Operación diaria<br>Captura · Flujos · Bots</small></div>
   <span class="arrow">↔</span>
@@ -81,350 +111,76 @@
   <span class="arrow">↔</span>
   <div class="layer l3">📊 Looker<br>Studio<br><small>Dashboards<br>dinámicos</small></div>
 </div>
+<div class="tab-note"><strong>🔐 Autenticación:</strong> Solo usuarios del dominio <code>@jetautomatizacion.com</code> (Google Workspace).<br><strong>🌐 Portal de clientes:</strong> Mini webapp en Firebase (fase 2) para clientes.<br><strong>💰 Costo adicional:</strong> $0 — todo dentro del ecosistema Google Workspace.</div>
 
-<div class="tab-note">
-  <strong>🔐 Autenticación:</strong> Solo usuarios del dominio <code>@jetautomatizacion.com</code> (Google Workspace).<br>
-  <strong>🌐 Portal de clientes:</strong> Mini webapp en Firebase (fase 2) para que clientes vean estatus, aprueben cotizaciones y firmen entregas.<br>
-  <strong>💰 Costo adicional:</strong> $0 — todo dentro del ecosistema Google Workspace que ya tienes.
-</div>
-
-<!-- MÓDULOS -->
 <h2><span class="icon">📦</span> 12 Módulos del ERP</h2>
-
 <div class="grid">
-
-<div class="card">
-  <h3><span class="modulo-num">M1</span> Catálogos Base</h3>
-  <div class="tablas">5 tablas</div>
-  <ul>
-    <li>Empresas (Clientes) — 17 registros</li>
-    <li>Proveedores — ~40 registros</li>
-    <li>Usuarios (Contactos) — ~46 registros</li>
-    <li>Colaboradores (Empleados JET)</li>
-    <li>Maquinaria — CNC, tornos, fresas…</li>
-  </ul>
+  <div class="card"><h3><span class="modulo-num">M1</span> Catálogos Base</h3><div class="tablas">5 tablas</div><ul><li>Empresas (Clientes) — 17 registros</li><li>Proveedores — ~40 registros</li><li>Usuarios (Contactos) — ~46 registros</li><li>Colaboradores (Empleados JET)</li><li>Maquinaria — CNC, tornos, fresas...</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M2</span> Proyectos</h3><div class="tablas">2 tablas</div><ul><li>Proyectos — Ciclo completo: prospecto → pagado</li><li>Levantamientos — requisitos, archivos, fotos</li><li>8 Estatus: Prospecto · Cotizado · Aprobado · En Proceso · Entregado · Facturado · Pagado · Cancelado</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M3</span> Cotizaciones</h3><div class="tablas">2 tablas</div><ul><li>Cotizaciones_Maestro — cabecera con totales, moneda, vigencia</li><li>Cotizaciones_Partidas — líneas con cantidad, precio, subtotal</li><li>Flujo: Borrador → Enviada → Aceptada/Rechazada</li><li>PDF generado automáticamente</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M4</span> Órdenes de Compra</h3><div class="tablas">2 tablas</div><ul><li>OC_Proveedor_Maestro — OC con tipo de pago, factura del proveedor</li><li>OC_Proveedor_Partidas — líneas de compra ligadas a cotizaciones</li><li>Relación directa con Proyectos y Proveedores</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M5</span> Almacén</h3><div class="tablas">2 tablas</div><ul><li>Productos — catálogo con SKU, stock mínimo, ubicación</li><li>Movimientos_Almacen — entradas, salidas, ajustes por proyecto</li><li>Alertas automáticas de stock bajo</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M6</span> Requisiciones</h3><div class="tablas">2 tablas</div><ul><li>Requisiciones — solicitud de material por proyecto con aprobación</li><li>Requisiciones_Partidas — líneas de material requerido</li><li>Flujo: Borrador → Solicitada → Aprobada → Comprada → Entregada</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M7</span> Producción</h3><div class="tablas">2 tablas</div><ul><li>Órdenes de Trabajo — por proyecto, máquina y operador</li><li>Planeacion_Produccion — calendario dinámico del taller (Gantt)</li><li>Horas estimadas vs reales, costos de máquina</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M8</span> Entregas y Facturación</h3><div class="tablas">4 tablas</div><ul><li>Entregas — con firma digital del cliente y GPS</li><li>Remisiones — PDF generado automáticamente</li><li>Facturación — folio fiscal, PDF, XML</li><li>Pagos — fecha estimada, real, complemento, SIVS</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M9</span> Servicio de Campo</h3><div class="tablas">1 tabla</div><ul><li>Reportes_Servicio — doble firma (técnico + cliente)</li><li>Fotos antes/después del servicio</li><li>Material utilizado, hallazgos, tiempo real</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M10</span> CRM</h3><div class="tablas">2 tablas</div><ul><li>Oportunidades — pipeline de ventas con fase y probabilidad</li><li>Actividades_CRM — llamadas, correos, visitas, reuniones</li><li>Al ganarse, se convierte automáticamente en Proyecto</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M11</span> Nómina</h3><div class="tablas">1 tabla</div><ul><li>Nominas — por colaborador y periodo</li><li>Sueldo + Percepciones - Deducciones = Total Neto</li><li>Comprobante PDF por periodo</li></ul></div>
+  <div class="card"><h3><span class="modulo-num">M12</span> Gastos</h3><div class="tablas">1 tabla</div><ul><li>Gastos — Directos, Operativos, Viáticos por proyecto</li><li>Comprobante anexado, flujo de aprobación</li><li>Dashboards de rentabilidad por proyecto</li></ul></div>
 </div>
 
-<div class="card">
-  <h3><span class="modulo-num">M2</span> Proyectos</h3>
-  <div class="tablas">2 tablas</div>
-  <ul>
-    <li>Proyectos — Ciclo completo: prospecto → pagado</li>
-    <li>Levantamientos — requisitos, archivos, fotos</li>
-    <li>Estatus: Prospecto · Cotizado · Aprobado · En Proceso · Entregado · Facturado · Pagado · Cancelado</li>
-  </ul>
-</div>
+<h2><span class="icon">🗄️</span> Estructura de Base de Datos</h2>
+<details><summary>📋 M1: Catálogos (Empresas, Proveedores, Usuarios, Colaboradores, Maquinaria)</summary><div class="content schema-table">
+<h3>Empresas (Clientes)</h3>
+<table><tr><th>Columna</th><th>Tipo</th><th>Descripción</th></tr><tr><td>ID_Empresa</td><td>Text (PK)</td><td>ID único</td></tr><tr><td>Nombre_Empresa</td><td>Text</td><td>Razón comercial</td></tr><tr><td>RFC</td><td>Text</td><td>RFC fiscal</td></tr><tr><td>Razon_Social</td><td>Text</td><td>Razón social completa</td></tr><tr><td>Direccion</td><td>LongText</td><td>Dirección fiscal</td></tr><tr><td>Giro</td><td>Text</td><td>Sector</td></tr><tr><td>Dias_Credito</td><td>Number</td><td>Días de crédito</td></tr><tr><td>Foto</td><td>Image</td><td>Logo o fachada</td></tr><tr><td>Activo</td><td>Yes/No</td><td>Default: Sí</td></tr></table>
+<h3>Proveedores</h3>
+<table><tr><th>Columna</th><th>Tipo</th></tr><tr><td>ID_Proveedor · Nombre_Proveedor · RFC · Direccion · Telefono · Contacto · Giro · Foto · Cuentas_Bancarias · CSF_File · Activo</td></tr></table>
+<h3>Usuarios (Contactos)</h3>
+<table><tr><th>Columna</th><th>Tipo</th></tr><tr><td>ID_Usuario · ID_Empresa (Ref) · Nombre · Correo · Telefono · Puesto · Foto · Activo</td></tr></table>
+<h3>Colaboradores (Empleados JET)</h3>
+<table><tr><th>Columna</th><th>Tipo</th></tr><tr><td>ID_Colaborador · Nombre · RFC · NSS · Telefono · Correo · Direccion · Fecha_Nacimiento · Sueldo_Base · Puesto · Fecha_Ingreso · Activo</td></tr></table>
+<h3>Maquinaria</h3>
+<table><tr><th>Columna</th><th>Tipo</th></tr><tr><td>ID_Maquina · Tipo (Enum: CNC,Torno,Fresa,Soldadura) · Nombre · Marca · Fecha_Ultimo_Mtto · Fecha_Proximo_Mtto · Costo_Hora_Cliente · Costo_Hora_Interno · Estatus · Activo</td></tr></table>
+</div></details>
 
-<div class="card">
-  <h3><span class="modulo-num">M3</span> Cotizaciones</h3>
-  <div class="tablas">2 tablas</div>
-  <ul>
-    <li>Cotizaciones_Maestro — cabecera con totales, moneda, vigencia</li>
-    <li>Cotizaciones_Partidas — líneas con cantidad, precio, subtotal</li>
-    <li>Flujo: Borrador → Enviada → Aceptada/Rechazada</li>
-    <li>PDF generado automáticamente</li>
-  </ul>
-</div>
+<details><summary>📋 M2-M4: Proyectos, Cotizaciones, Órdenes de Compra</summary><div class="content schema-table">
+<h3>Proyectos (Tabla Central)</h3>
+<table><tr><th>Columna</th><th>Tipo</th></tr><tr><td>ID_Proyecto · Nombre_Proyecto · ID_Empresa (Ref) · ID_Usuario (Ref) · Responsable (Email) · Comentarios</td></tr><tr><td>Estatus (Enum): Prospecto · Cotizado · Aprobado · En Proceso · Entregado · Facturado · Pagado · Cancelado</td></tr><tr><td>Fecha_Creacion · Fecha_Cierre · Foto_Proyecto · Prioridad (Baja,Media,Alta,Urgente)</td></tr></table>
+<h3>Cotizaciones_Maestro</h3>
+<table><tr><th>Columna</th><th>Tipo</th></tr><tr><td>ID_Cotizacion · ID_Proyecto (Ref) · ID_Empresa (Ref) · ID_Usuario (Ref) · Responsable · Fecha · Hora</td></tr><tr><td>Estatus · Tipo_Cotizacion · Moneda · Tipo_Cambio · Subtotal · IVA · Total (calculados) · Archivo_PDF · Vigencia_Dias · Fecha_Vencimiento</td></tr></table>
+<h3>Cotizaciones_Partidas</h3>
+<table><tr><td>ID_Partida · ID_Cotizacion (Ref) · Cantidad · Descripcion · Precio_Unitario · Subtotal (calc) · Comentarios</td></tr></table>
+<h3>OC_Proveedor_Maestro</h3>
+<table><tr><td>ID_OC · ID_Proyecto (Ref) · ID_Proveedor (Ref) · Responsable · Fecha · Hora · Estatus · Tipo_Pago · Moneda · Tipo_Cambio · Subtotal · IVA · Total (calc) · Archivo_PDF · Factura_Proveedor_File · Cotizacion_Proveedor_File</td></tr></table>
+<h3>OC_Proveedor_Partidas</h3>
+<table><tr><td>ID_Partida_OC · ID_OC (Ref) · Cantidad · Descripcion · Precio_Unitario · Subtotal · ID_Cotizacion (Ref)</td></tr></table>
+</div></details>
 
-<div class="card">
-  <h3><span class="modulo-num">M4</span> Órdenes de Compra</h3>
-  <div class="tablas">2 tablas</div>
-  <ul>
-    <li>OC_Proveedor_Maestro — OC a proveedores con tipo de pago</li>
-    <li>OC_Proveedor_Partidas — líneas de compra</li>
-    <li>Relación directa con cotizaciones y proyectos</li>
-    <li>Almacena factura del proveedor y cotización previa</li>
-  </ul>
-</div>
+<details><summary>📋 M5-M6: Almacén y Requisiciones</summary><div class="content schema-table">
+<h3>Productos</h3><table><tr><td>ID_Producto · Nombre · Categoria (Enum) · Unidad (Enum) · Stock_Minimo · Stock_Actual (calc) · Costo_Promedio · Ubicacion · Activo</td></tr></table>
+<h3>Movimientos_Almacen</h3><table><tr><td>ID_Movimiento · ID_Producto (Ref) · Tipo (Entrada/Salida/Ajuste) · Cantidad · Fecha · ID_Proyecto (Ref) · Responsable · Comentario</td></tr></table>
+<h3>Requisiciones</h3><table><tr><td>ID_Requisicion · ID_Proyecto (Ref) · Solicitante · Fecha · Estatus · Prioridad · Comentarios · Aprobador · Fecha_Aprobacion</td></tr></table>
+<h3>Requisiciones_Partidas</h3><table><tr><td>ID_Partida_Req · ID_Requisicion (Ref) · Cantidad · Descripcion · ID_Producto (Ref) · Estatus</td></tr></table>
+</div></details>
 
-<div class="card">
-  <h3><span class="modulo-num">M5</span> Almacén</h3>
-  <div class="tablas">2 tablas</div>
-  <ul>
-    <li>Productos — catálogo con SKU, stock mínimo, ubicación</li>
-    <li>Movimientos_Almacen — entradas, salidas, ajustes</li>
-    <li>Todo ligado a proyecto para trazabilidad</li>
-    <li>Alertas de stock bajo</li>
-  </ul>
-</div>
+<details><summary>📋 M7-M9: Producción, Entregas y Servicio de Campo</summary><div class="content schema-table">
+<h3>Órdenes de Trabajo</h3><table><tr><td>ID_OT · ID_Proyecto (Ref) · Descripcion · ID_Maquina (Ref) · Responsable (Ref→Colaboradores)</td></tr><tr><td>Fecha_Inicio · Fecha_Fin · Fecha_Inicio_Real · Fecha_Fin_Real · Horas_Estimadas · Horas_Reales · Estatus · Prioridad (1-5)</td></tr></table>
+<h3>Planeacion_Produccion</h3><table><tr><td>ID_Plan · ID_OT (Ref) · ID_Maquina (Ref) · ID_Colaborador (Ref) · Fecha · Hora_Inicio · Hora_Fin · Estatus</td></tr></table>
+<h3>Entregas</h3><table><tr><td>ID_Entrega · ID_Proyecto · Fecha · Tipo · Descripcion · Archivo · Firma_Cliente (Signature) · Nombre_Recibe · Fotos · Lat/Long (GPS)</td></tr></table>
+<h3>Reportes de Servicio</h3><table><tr><td>ID_Reporte · ID_Proyecto · ID_Empresa · Tecnico · Fecha · Hora_Inicio · Hora_Fin · Tipo_Servicio</td></tr><tr><td>Descripcion_Trabajo · Hallazgos · Material_Utilizado · Firma_Tecnico · Firma_Cliente · Fotos_Antes · Fotos_Despues</td></tr></table>
+</div></details>
 
-<div class="card">
-  <h3><span class="modulo-num">M6</span> Requisiciones</h3>
-  <div class="tablas">2 tablas</div>
-  <ul>
-    <li>Requisiciones — solicitud de material por proyecto</li>
-    <li>Requisiciones_Partidas — líneas de material</li>
-    <li>Flujo de aprobación: Solicitante → Aprobador → Compra</li>
-    <li>Estatus: Borrador · Solicitada · Aprobada · Comprada · Entregada</li>
-  </ul>
-</div>
+<details><summary>📋 M10-M12: CRM, Nómina, Gastos</summary><div class="content schema-table">
+<h3>Oportunidades (CRM)</h3><table><tr><td>ID_Oportunidad · ID_Empresa · ID_Usuario · Titulo · Descripcion · Valor_Estimado · Fase · Probabilidad (%) · Fecha_Cierre_Estimada · Responsable · Origen · ID_Proyecto</td></tr></table>
+<h3>Actividades CRM</h3><table><tr><td>ID_Actividad · ID_Oportunidad · Tipo · Fecha · Descripcion · Responsable · Proxima_Accion · Fecha_Proxima</td></tr></table>
+<h3>Nómina</h3><table><tr><td>ID_Nomina · ID_Colaborador · Periodo_Inicio · Periodo_Fin · Dias_Trabajados · Sueldo_Base · Percepciones · Deducciones · Total_Neto (calc) · Fecha_Pago · Estatus · Comprobante</td></tr></table>
+<h3>Gastos</h3><table><tr><td>ID_Gasto · ID_Proyecto · Tipo (Directo/Operativo/Viáticos) · Descripcion · Monto · Fecha · Responsable · Comprobante · Estatus</td></tr></table>
+</div></details>
 
-<div class="card">
-  <h3><span class="modulo-num">M7</span> Producción</h3>
-  <div class="tablas">2 tablas</div>
-  <ul>
-    <li>Órdenes de Trabajo — por proyecto, máquina y operador</li>
-    <li>Planeación_Producción — calendario dinámico del taller</li>
-    <li>Horas estimadas vs reales, costos de máquina</li>
-    <li>Vista tipo Gantt para programación visual</li>
-  </ul>
-</div>
-
-<div class="card">
-  <h3><span class="modulo-num">M8</span> Entregas y Facturación</h3>
-  <div class="tablas">4 tablas</div>
-  <ul>
-    <li>Entregas — material/proyecto/servicio con firma digital del cliente</li>
-    <li>Remisiones — PDF generado automáticamente</li>
-    <li>Facturación — folio, PDF, XML, estatus</li>
-    <li>Pagos — fecha estimada, fecha real, complemento, SIVS</li>
-  </ul>
-</div>
-
-<div class="card">
-  <h3><span class="modulo-num">M9</span> Servicio de Campo</h3>
-  <div class="tablas">1 tabla</div>
-  <ul>
-    <li>Reportes_Servicio — con doble firma digital (técnico + cliente)</li>
-    <li>Fotos antes/después del servicio</li>
-    <li>Material utilizado, hallazgos, tiempo real</li>
-    <li>Tipos: Correctivo · Preventivo · Instalación · Soporte · Urgencia</li>
-  </ul>
-</div>
-
-<div class="card">
-  <h3><span class="modulo-num">M10</span> CRM</h3>
-  <div class="tablas">2 tablas</div>
-  <ul>
-    <li>Oportunidades — pipeline de ventas con fase y probabilidad</li>
-    <li>Actividades_CRM — llamadas, correos, visitas, reuniones</li>
-    <li>Fases: Prospección → Contacto → Cotización → Negociación → Ganada/Perdida</li>
-    <li>Al ganarse, se convierte automáticamente en proyecto</li>
-  </ul>
-</div>
-
-<div class="card">
-  <h3><span class="modulo-num">M11</span> Nómina</h3>
-  <div class="tablas">1 tabla</div>
-  <ul>
-    <li>Por colaborador y periodo (semanal/quincenal)</li>
-    <li>Sueldo base, percepciones (bonos, extras), deducciones (ISR, IMSS)</li>
-    <li>Total neto calculado automáticamente</li>
-    <li>Comprobante PDF de cada periodo</li>
-  </ul>
-</div>
-
-<div class="card">
-  <h3><span class="modulo-num">M12</span> Gastos</h3>
-  <div class="tablas">1 tabla</div>
-  <ul>
-    <li>Gastos por proyecto: directos, operativos, viáticos</li>
-    <li>Comprobante (ticket/factura) anexado</li>
-    <li>Flujo de aprobación de gastos</li>
-    <li>Dashboards de rentabilidad por proyecto (ingresos - gastos)</li>
-  </ul>
-</div>
-
-</div>
-
-<!-- ESTRUCTURA COMPLETA DE BASE DE DATOS -->
-<h2><span class="icon">🗄️</span> Estructura Completa de Base de Datos</h2>
-<p style="color:var(--muted);margin-bottom:16px;">24 tablas relacionales · Diseño normalizado · Listo para AppSheet Database</p>
-
-<details>
-  <summary>📋 M1: Catálogos (Empresas, Proveedores, Usuarios, Colaboradores, Maquinaria)</summary>
-  <div class="content schema-table">
-    <h3>Empresas (Clientes)</h3>
-    <table><tr><th>Columna</th><th>Tipo</th><th>Descripción</th></tr>
-    <tr><td>ID_Empresa</td><td>Text (PK)</td><td>ID único</td></tr>
-    <tr><td>Nombre_Empresa</td><td>Text</td><td>Razón comercial</td></tr>
-    <tr><td>RFC</td><td>Text</td><td>RFC fiscal</td></tr>
-    <tr><td>Razon_Social</td><td>Text</td><td>Razón social completa</td></tr>
-    <tr><td>Direccion</td><td>LongText</td><td>Dirección fiscal</td></tr>
-    <tr><td>Giro</td><td>Text</td><td>Sector</td></tr>
-    <tr><td>Dias_Credito</td><td>Number</td><td>Días de crédito</td></tr>
-    <tr><td>Foto</td><td>Image</td><td>Logo o fachada</td></tr>
-    <tr><td>Activo</td><td>Yes/No</td><td>Default: Sí</td></tr></table>
-
-    <h3>Proveedores</h3>
-    <table><tr><th>Columna</th><th>Tipo</th><th>Descripción</th></tr>
-    <tr><td>ID_Proveedor</td><td>Text (PK)</td><td>ID único</td></tr>
-    <tr><td>Nombre_Proveedor</td><td>Text</td><td>Nombre comercial</td></tr>
-    <tr><td>RFC</td><td>Text</td><td>RFC fiscal</td></tr>
-    <tr><td>Direccion</td><td>LongText</td><td>Dirección</td></tr>
-    <tr><td>Telefono</td><td>Phone</td><td>Teléfono principal</td></tr>
-    <tr><td>Contacto</td><td>Text</td><td>Persona contacto</td></tr>
-    <tr><td>Giro</td><td>Text</td><td>Giro</td></tr>
-    <tr><td>Foto</td><td>Image</td><td>Logo</td></tr>
-    <tr><td>Cuentas_Bancarias</td><td>File</td><td>PDF/Imagen de cuenta</td></tr>
-    <tr><td>CSF_File</td><td>File</td><td>Constancia Situación Fiscal</td></tr>
-    <tr><td>Activo</td><td>Yes/No</td><td>Default: Sí</td></tr></table>
-
-    <h3>Usuarios (Contactos de clientes/proveedores)</h3>
-    <table><tr><th>Columna</th><th>Tipo</th><th>Descripción</th></tr>
-    <tr><td>ID_Usuario</td><td>Text (PK)</td><td>ID único</td></tr>
-    <tr><td>ID_Empresa</td><td>Ref → Empresas</td><td>Empresa a la que pertenece</td></tr>
-    <tr><td>Nombre</td><td>Text</td><td>Nombre completo</td></tr>
-    <tr><td>Correo</td><td>Email</td><td>Email</td></tr>
-    <tr><td>Telefono</td><td>Phone</td><td>Teléfono</td></tr>
-    <tr><td>Puesto</td><td>Text</td><td>Cargo</td></tr>
-    <tr><td>Foto</td><td>Image</td><td>Foto del contacto</td></tr>
-    <tr><td>Activo</td><td>Yes/No</td><td>Default: Sí</td></tr></table>
-
-    <h3>Colaboradores (Empleados JET)</h3>
-    <table><tr><th>Columna</th><th>Tipo</th><th>Descripción</th></tr>
-    <tr><td>ID_Colaborador</td><td>Text (PK)</td><td>ID único</td></tr>
-    <tr><td>Nombre</td><td>Text</td><td>Nombre completo</td></tr>
-    <tr><td>RFC</td><td>Text</td><td>RFC con homoclave</td></tr>
-    <tr><td>NSS</td><td>Text</td><td>Número de seguro social</td></tr>
-    <tr><td>Telefono</td><td>Phone</td><td>Teléfono</td></tr>
-    <tr><td>Correo</td><td>Email</td><td>Email personal</td></tr>
-    <tr><td>Direccion</td><td>LongText</td><td>Domicilio</td></tr>
-    <tr><td>Fecha_Nacimiento</td><td>Date</td><td>Fecha de nacimiento</td></tr>
-    <tr><td>Sueldo_Base</td><td>Price</td><td>Sueldo mensual base</td></tr>
-    <tr><td>Puesto</td><td>Text</td><td>Cargo en JET</td></tr>
-    <tr><td>Fecha_Ingreso</td><td>Date</td><td>Fecha de ingreso</td></tr>
-    <tr><td>Activo</td><td>Yes/No</td><td>Default: Sí</td></tr></table>
-
-    <h3>Maquinaria</h3>
-    <table><tr><th>Columna</th><th>Tipo</th><th>Descripción</th></tr>
-    <tr><td>ID_Maquina</td><td>Text (PK)</td><td>ID único</td></tr>
-    <tr><td>Tipo</td><td>Enum</td><td>CNC, Torno, Fresa, Soldadura…</td></tr>
-    <tr><td>Nombre</td><td>Text</td><td>Nombre/Modelo</td></tr>
-    <tr><td>Marca</td><td>Text</td><td>Marca</td></tr>
-    <tr><td>Fecha_Ultimo_Mtto</td><td>Date</td><td>Último mantenimiento</td></tr>
-    <tr><td>Fecha_Proximo_Mtto</td><td>Date</td><td>Próximo mantenimiento</td></tr>
-    <tr><td>Costo_Hora_Cliente</td><td>Price</td><td>Lo que se cobra al cliente</td></tr>
-    <tr><td>Costo_Hora_Interno</td><td>Price</td><td>Costo real para JET</td></tr>
-    <tr><td>Estatus</td><td>Enum</td><td>Disponible, En Uso, Mtto, Fuera de Servicio</td></tr>
-    <tr><td>Activo</td><td>Yes/No</td><td>Default: Sí</td></tr></table>
-  </div>
-</details>
-
-<details>
-  <summary>📋 M2-M4: Proyectos, Cotizaciones, Órdenes de Compra</summary>
-  <div class="content schema-table">
-    <h3>Proyectos (Tabla Central)</h3>
-    <table><tr><th>Columna</th><th>Tipo</th><th>Descripción</th></tr>
-    <tr><td>ID_Proyecto</td><td>Text (PK)</td><td>ID único</td></tr>
-    <tr><td>Nombre_Proyecto</td><td>Text</td><td>Nombre descriptivo</td></tr>
-    <tr><td>ID_Empresa</td><td>Ref → Empresas</td><td>Cliente</td></tr>
-    <tr><td>ID_Usuario</td><td>Ref → Usuarios</td><td>Contacto del cliente</td></tr>
-    <tr><td>Responsable</td><td>Email</td><td>Colaborador JET responsable</td></tr>
-    <tr><td>Comentarios</td><td>LongText</td><td>Notas generales</td></tr>
-    <tr><td>Estatus</td><td>Enum</td><td>Prospecto · Cotizado · Aprobado · En Proceso · Entregado · Facturado · Pagado · Cancelado</td></tr>
-    <tr><td>Fecha_Creacion</td><td>Date</td><td>Auto</td></tr>
-    <tr><td>Fecha_Cierre</td><td>Date</td><td>Fecha de cierre</td></tr>
-    <tr><td>Foto_Proyecto</td><td>Image</td><td>Foto representativa</td></tr>
-    <tr><td>Prioridad</td><td>Enum</td><td>Baja · Media · Alta · Urgente</td></tr></table>
-
-    <h3>Cotizaciones_Maestro</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Cotizacion</td><td>Text (PK)</td></tr>
-    <tr><td>ID_Proyecto</td><td>Ref → Proyectos</td></tr>
-    <tr><td>ID_Empresa</td><td>Ref → Empresas</td></tr>
-    <tr><td>ID_Usuario</td><td>Ref → Usuarios</td></tr>
-    <tr><td>Responsable · Fecha · Hora · Estatus · Tipo_Cotizacion · Comentarios · Moneda · Tipo_Cambio</td><td></td></tr>
-    <tr><td>Subtotal · IVA · Total</td><td>Price (calculados)</td></tr>
-    <tr><td>Archivo_PDF · Vigencia_Dias · Fecha_Vencimiento</td><td></td></tr></table>
-
-    <h3>Cotizaciones_Partidas</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Partida</td><td>Text (PK)</td></tr>
-    <tr><td>ID_Cotizacion</td><td>Ref → Cotizaciones_Maestro</td></tr>
-    <tr><td>Cantidad · Descripcion · Precio_Unitario · Subtotal (calculado) · Comentarios</td><td></td></tr></table>
-
-    <h3>OC_Proveedor_Maestro</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_OC</td><td>Text (PK)</td></tr>
-    <tr><td>ID_Proyecto</td><td>Ref → Proyectos</td></tr>
-    <tr><td>ID_Proveedor</td><td>Ref → Proveedores</td></tr>
-    <tr><td>Responsable · Fecha · Hora · Estatus · Tipo_Pago · Moneda · Tipo_Cambio</td><td></td></tr>
-    <tr><td>Subtotal · IVA · Total (calculados) · Archivo_PDF · Factura_Proveedor_File · Cotizacion_Proveedor_File</td><td></td></tr></table>
-
-    <h3>OC_Proveedor_Partidas</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Partida_OC · ID_OC (Ref) · Cantidad · Descripcion · Precio_Unitario · Subtotal · ID_Cotizacion (Ref)</td><td></td></tr></table>
-  </div>
-</details>
-
-<details>
-  <summary>📋 M5-M6: Almacén y Requisiciones</summary>
-  <div class="content schema-table">
-    <h3>Productos</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Producto · Nombre · Categoria (Enum) · Unidad (Enum) · Stock_Minimo · Stock_Actual (calc) · Costo_Promedio · Ubicacion · Activo</td><td></td></tr></table>
-
-    <h3>Movimientos_Almacen</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Movimiento · ID_Producto (Ref) · Tipo (Entrada/Salida/Ajuste) · Cantidad · Fecha (DateTime) · ID_Proyecto (Ref) · Responsable · Comentario</td><td></td></tr></table>
-
-    <h3>Requisiciones</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Requisicion · ID_Proyecto (Ref) · Solicitante · Fecha · Estatus · Prioridad · Comentarios · Aprobador · Fecha_Aprobacion</td><td></td></tr></table>
-
-    <h3>Requisiciones_Partidas</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Partida_Req · ID_Requisicion (Ref) · Cantidad · Descripcion · ID_Producto (Ref) · Estatus</td><td></td></tr></table>
-  </div>
-</details>
-
-<details>
-  <summary>📋 M7-M9: Producción, Entregas y Servicio de Campo</summary>
-  <div class="content schema-table">
-    <h3>Órdenes de Trabajo</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_OT · ID_Proyecto (Ref) · Descripcion · ID_Maquina (Ref) · Responsable (Ref→Colaboradores)</td><td></td></tr>
-    <tr><td>Fecha_Inicio · Fecha_Fin · Fecha_Inicio_Real · Fecha_Fin_Real · Horas_Estimadas · Horas_Reales</td><td></td></tr>
-    <tr><td>Estatus · Prioridad (1-5) · Comentarios</td><td></td></tr></table>
-
-    <h3>Planeación Producción</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Plan · ID_OT (Ref) · ID_Maquina (Ref) · ID_Colaborador (Ref) · Fecha · Hora_Inicio · Hora_Fin · Estatus</td><td></td></tr></table>
-
-    <h3>Entregas</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Entrega · ID_Proyecto · Fecha · Tipo (Material/Proyecto/Servicio) · Descripcion · Archivo</td><td></td></tr>
-    <tr><td>Firma_Cliente (Signature) · Nombre_Recibe · Fotos (ImageList) · Latitud/Longitud (GPS)</td><td></td></tr></table>
-
-    <h3>Reportes de Servicio</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Reporte · ID_Proyecto · ID_Empresa · Tecnico · Fecha · Hora_Inicio · Hora_Fin · Tipo_Servicio</td><td></td></tr>
-    <tr><td>Descripcion_Trabajo · Hallazgos · Material_Utilizado</td><td></td></tr>
-    <tr><td>Firma_Tecnico (Signature) · Firma_Cliente (Signature) · Nombre_Cliente_Firma</td><td></td></tr>
-    <tr><td>Fotos_Antes · Fotos_Despues (ImageList)</td><td></td></tr></table>
-  </div>
-</details>
-
-<details>
-  <summary>📋 M10-M12: CRM, Nómina, Gastos</summary>
-  <div class="content schema-table">
-    <h3>Oportunidades (CRM)</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Oportunidad · ID_Empresa · ID_Usuario · Titulo · Descripcion · Valor_Estimado</td><td></td></tr>
-    <tr><td>Fase (Prospección→Contacto→Cotización→Negociación→Ganada/Perdida) · Probabilidad (%)</td><td></td></tr>
-    <tr><td>Fecha_Cierre_Estimada · Responsable · Origen · ID_Proyecto (si se convierte)</td><td></td></tr></table>
-
-    <h3>Actividades CRM</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Actividad · ID_Oportunidad · ID_Empresa · Tipo (Llamada/Correo/Visita/Reunión) · Fecha · Descripcion · Responsable · Proxima_Accion · Fecha_Proxima</td><td></td></tr></table>
-
-    <h3>Nómina</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Nomina · ID_Colaborador · Periodo_Inicio · Periodo_Fin · Dias_Trabajados</td><td></td></tr>
-    <tr><td>Sueldo_Base · Percepciones · Deducciones · Total_Neto (calc) · Fecha_Pago · Estatus · Comprobante</td><td></td></tr></table>
-
-    <h3>Gastos</h3>
-    <table><tr><th>Columna</th><th>Tipo</th></tr>
-    <tr><td>ID_Gasto · ID_Proyecto · Tipo (Directo/Operativo/Viáticos) · Descripcion · Monto · Fecha · Responsable · Comprobante · Estatus</td><td></td></tr></table>
-  </div>
-</details>
-
-<!-- RELACIONES -->
 <h2><span class="icon">🔗</span> Mapa de Relaciones</h2>
 <div class="rel-grid">
-  <div class="rel-item"><code>Empresas</code> ← <code>Usuarios</code> (contacto pertenece a empresa)</div>
-  <div class="rel-item"><code>Empresas</code> ← <code>Proyectos</code> (cliente del proyecto)</div>
+  <div class="rel-item"><code>Empresas</code> ← <code>Usuarios</code> (contacto)</div>
+  <div class="rel-item"><code>Empresas</code> ← <code>Proyectos</code> (cliente)</div>
   <div class="rel-item"><code>Proyectos</code> → <code>Cotizaciones_Maestro</code> → <code>Cotizaciones_Partidas</code></div>
   <div class="rel-item"><code>Proyectos</code> → <code>OC_Proveedor_Maestro</code> → <code>OC_Proveedor_Partidas</code></div>
   <div class="rel-item"><code>Proveedores</code> ← <code>OC_Proveedor_Maestro</code></div>
@@ -438,93 +194,28 @@
   <div class="rel-item"><code>Proyectos</code> → <code>Reportes_Servicio</code> · <code>Gastos</code></div>
 </div>
 
-<!-- COSTOS -->
 <h2><span class="icon">💰</span> Estructura de Costos</h2>
-
 <div class="grid">
-  <div class="card cost-card">
-    <h3>Licencias</h3>
-    <div class="big">$0</div>
-    <p style="color:var(--muted);">Google Workspace ya incluye AppSheet y Looker Studio. Sin costo adicional.</p>
-  </div>
-  <div class="card cost-card">
-    <h3>Hosting Portal Web</h3>
-    <div class="big">$0</div>
-    <p style="color:var(--muted);">Firebase (Google) — plan gratuito: 10GB/mes, auth ilimitada, 50K lecturas/día.</p>
-  </div>
-  <div class="card cost-card">
-    <h3>Dominio</h3>
-    <div class="big">~$200</div>
-    <p style="color:var(--muted);">MXN/año. Solo si quieren portal propio (ej: clientes.jetautomatizacion.com).</p>
-  </div>
-  <div class="card cost-card">
-    <h3>Costo Total Mensual</h3>
-    <div class="big">$0</div>
-    <p style="color:var(--muted);">MXN. Todo corre sobre infraestructura Google que ya tienes.</p>
-  </div>
+  <div class="card cost-card"><h3>Licencias</h3><div class="big">$0</div><p style="color:var(--muted);">Google Workspace ya incluye AppSheet + Looker Studio.</p></div>
+  <div class="card cost-card"><h3>Hosting Portal Web</h3><div class="big">$0</div><p style="color:var(--muted);">Firebase — plan gratuito ilimitado.</p></div>
+  <div class="card cost-card"><h3>Dominio</h3><div class="big">~$200</div><p style="color:var(--muted);">MXN/año (solo si quieren portal propio).</p></div>
+  <div class="card cost-card"><h3>Costo Total Mensual</h3><div class="big">$0</div><p style="color:var(--muted);">MXN. Sobre infraestructura Google existente.</p></div>
 </div>
 
-<!-- TIMELINE -->
 <h2><span class="icon">⏱️</span> Plan de Ejecución</h2>
-
 <div class="timeline">
-  <div class="phase">
-    <div class="week">Fase 1</div>
-    <div class="label">1 semana</div>
-    <div class="desc"><strong>Diseño y setup</strong><br>Crear tablas en AppSheet Database, migrar datos existentes, configurar relaciones</div>
-  </div>
-  <div class="phase">
-    <div class="week">Fase 2</div>
-    <div class="label">2 semanas</div>
-    <div class="desc"><strong>Módulos base</strong><br>Proyectos, Cotizaciones, OC, Entregas, Remisiones, Facturación, Pagos</div>
-  </div>
-  <div class="phase">
-    <div class="week">Fase 3</div>
-    <div class="label">2 semanas</div>
-    <div class="desc"><strong>Módulos nuevos</strong><br>CRM, Almacén, Requisiciones, OT, Planeación Taller, Servicio de Campo</div>
-  </div>
-  <div class="phase">
-    <div class="week">Fase 4</div>
-    <div class="label">1 semana</div>
-    <div class="desc"><strong>Nómina + Gastos</strong><br>Nómina, control de gastos, dashboards Looker Studio</div>
-  </div>
-  <div class="phase">
-    <div class="week">Fase 5</div>
-    <div class="label">1-2 sem</div>
-    <div class="desc"><strong>Portal clientes</strong><br>Mini webapp Firebase para acceso externo con auth Google</div>
-  </div>
+  <div class="phase"><div class="week">Fase 1</div><div class="label">1 semana</div><div class="desc"><strong>Diseño y Setup</strong><br>Crear tablas en AppSheet Database, migrar datos, configurar relaciones</div></div>
+  <div class="phase"><div class="week">Fase 2</div><div class="label">2 semanas</div><div class="desc"><strong>Módulos Base</strong><br>Proyectos, Cotizaciones, OC, Entregas, Facturación, Pagos</div></div>
+  <div class="phase"><div class="week">Fase 3</div><div class="label">2 semanas</div><div class="desc"><strong>Módulos Nuevos</strong><br>CRM, Almacén, Requisiciones, OT, Taller, Servicio de Campo</div></div>
+  <div class="phase"><div class="week">Fase 4</div><div class="label">1 semana</div><div class="desc"><strong>Nómina + Gastos</strong><br>Nómina, control de gastos, dashboards Looker Studio</div></div>
+  <div class="phase"><div class="week">Fase 5</div><div class="label">1-2 sem</div><div class="desc"><strong>Portal Clientes</strong><br>Mini webapp Firebase con auth Google</div></div>
 </div>
 
-<div class="tab-note">
-  ⚡ <strong>Nota:</strong> Este timeline asume trabajo continuo con validaciones rápidas de Oscar y Ricardo. Si priorizan ciertos módulos, se ajusta. Lo que ustedes digan va primero.
-</div>
-
-<!-- REQUISITOS -->
 <h2><span class="icon">✅</span> Requisitos para Comenzar</h2>
-
 <div class="grid">
-  <div class="card">
-    <h3>De Oscar y Ricardo</h3>
-    <ul>
-      <li>Confirmar acceso a AppSheet Database en Google Workspace</li>
-      <li>Definir prioridad de módulos (¿qué necesitan YA?)</li>
-      <li>Completar datos faltantes: catálogo de maquinaria, datos de colaboradores</li>
-      <li>Validar el diseño de tablas presentado aquí</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h3>Técnicos (lo hago yo)</h3>
-    <ul>
-      <li>Crear 24 tablas en AppSheet Database</li>
-      <li>Migrar las 12 pestañas del Sheet actual a las nuevas tablas</li>
-      <li>Configurar relaciones (Ref) y fórmulas de cálculo</li>
-      <li>Construir vistas, formularios y flujos de aprobación</li>
-      <li>Automatizaciones (bots) para notificaciones</li>
-      <li>Dashboards en Looker Studio conectados a la DB</li>
-    </ul>
-  </div>
+  <div class="card"><h3>De Oscar y Ricardo</h3><ul><li>Confirmar acceso a AppSheet Database</li><li>Definir prioridad de módulos (¿qué necesitan YA?)</li><li>Completar datos faltantes: maquinaria, colaboradores</li><li>Validar diseño de tablas presentado</li></ul></div>
+  <div class="card"><h3>Técnicos (Felix)</h3><ul><li>Crear 24 tablas en AppSheet Database</li><li>Migrar las 12 pestañas del Sheet actual</li><li>Configurar relaciones y fórmulas</li><li>Construir vistas, formularios y flujos</li><li>Automatizaciones (bots)</li><li>Dashboards en Looker Studio</li></ul></div>
 </div>
-
 </div>
 
 <footer>
@@ -532,6 +223,46 @@
   <p style="margin-top:8px;">Diseñado por Felix Cruz · Arquitectura: AppSheet Database + Looker Studio + Firebase</p>
   <p style="margin-top:8px;font-size:.75em;">Documento confidencial. Uso exclusivo de JET Automatización.</p>
 </footer>
+</div>
 
+<script>
+(function(){
+  var PASSWORD = '#Jet#';
+  var overlay = document.getElementById('loginOverlay');
+  var error = document.getElementById('loginError');
+  var input = document.getElementById('passInput');
+  var logoutBtn = document.getElementById('logoutBtn');
+
+  if (sessionStorage.getItem('jet_erp_auth') === '1') {
+    overlay.classList.add('hidden');
+    logoutBtn.classList.remove('hidden');
+  }
+
+  window.checkPass = function(){
+    if (input.value === PASSWORD) {
+      sessionStorage.setItem('jet_erp_auth', '1');
+      overlay.classList.add('hidden');
+      logoutBtn.classList.remove('hidden');
+      error.style.display = 'none';
+    } else {
+      error.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  };
+
+  window.logout = function(){
+    sessionStorage.removeItem('jet_erp_auth');
+    overlay.classList.remove('hidden');
+    logoutBtn.classList.add('hidden');
+    input.value = '';
+    input.focus();
+  };
+
+  input.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') checkPass();
+  });
+})();
+</script>
 </body>
 </html>
